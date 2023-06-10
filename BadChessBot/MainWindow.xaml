@@ -6,7 +6,16 @@
         xmlns:local="clr-namespace:BadChessBot"
         mc:Ignorable="d"
         Title="Bad Chess Bot GUI" Height="600" Width="800">
-    <Grid>
+    <Window.Resources>
+        <BitmapImage x:Key="PawnSprite" UriSource="./resources/pawn.png" />
+        <BitmapImage x:Key="KnightSprite" UriSource="./resources/knight.png" />
+        <BitmapImage x:Key="RookSprite" UriSource="./resources/rook.png" />
+        <BitmapImage x:Key="BishopSprite" UriSource="./resources/bishop.png" />
+        <BitmapImage x:Key="KingSprite" UriSource="./resources/king.png" />
+        <BitmapImage x:Key="QueenSprite" UriSource="./resources/queen.png" />
+    </Window.Resources>
+    <Grid> 
+        <Image Source="{StaticResource BishopSprite}" Width="50" Height="50" HorizontalAlignment="Left"/>
         <Grid x:Name="ChessField" Width="400" Height="400">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"></ColumnDefinition>

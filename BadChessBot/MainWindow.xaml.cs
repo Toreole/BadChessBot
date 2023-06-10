@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace BadChessBot
@@ -52,13 +44,14 @@ namespace BadChessBot
         {
             if(sender is Rectangle rec)
             {
-                rec.Fill = new SolidColorBrush(new Color
-                {
-                    R = (byte)random.Next(255),
-                    G = (byte)random.Next(255),
-                    B = (byte)random.Next(255),
-                    A = 255
-                });
+                int x = Grid.GetColumn(rec);
+                int y = Grid.GetRow(rec);
+                var found = this.FindResource("PawnSprite");
+                Image img = new() { Width = 50, Height = 50, Source = found as BitmapImage };
+                Grid.SetColumn(img, x);
+                Grid.SetRow(img, y);
+                Panel.SetZIndex(img, 100);
+                ChessField.Children.Add(img);
             }
         }
 
