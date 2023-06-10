@@ -13,32 +13,81 @@
         <BitmapImage x:Key="BishopSprite" UriSource="./resources/bishop.png" />
         <BitmapImage x:Key="KingSprite" UriSource="./resources/king.png" />
         <BitmapImage x:Key="QueenSprite" UriSource="./resources/queen.png" />
+
+        <BitmapImage x:Key="PawnSprite2" UriSource="./resources/pawn2.png" />
+        <BitmapImage x:Key="KnightSprite2" UriSource="./resources/knight2.png" />
+        <BitmapImage x:Key="RookSprite2" UriSource="./resources/rook2.png" />
+        <BitmapImage x:Key="BishopSprite2" UriSource="./resources/bishop2.png" />
+        <BitmapImage x:Key="KingSprite2" UriSource="./resources/king2.png" />
+        <BitmapImage x:Key="QueenSprite2" UriSource="./resources/queen2.png" />
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Padding" Value="5,1,5,1" />
+        </Style>
     </Window.Resources>
-    <Grid> 
-        <Image Source="{StaticResource BishopSprite}" Width="50" Height="50" HorizontalAlignment="Left"/>
-        <Grid x:Name="ChessField" Width="400" Height="400">
+    <Grid>
+        <Label x:Name="BotRecommendationLabel" FontSize="20" Width="270" Height="100" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,57,0,0">Recommended Move=......</Label>
+        <WrapPanel x:Name="TakenPiecesStackPanel" Height="350" Width="200" HorizontalAlignment="Right" VerticalAlignment="Bottom" FlowDirection="LeftToRight" Orientation="Vertical" />
+        <Grid x:Name="ChessField" Width="500" Height="500" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
-                <ColumnDefinition Width="50"></ColumnDefinition>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
-            
+            <TextBlock Grid.Row="0" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">a</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="2" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">b</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="3" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">c</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="4" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">d</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="5" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">e</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="6" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">f</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="7" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">g</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="8" TextAlignment="Center" VerticalAlignment="Bottom" FontSize="20">h</TextBlock>
+
+            <TextBlock Grid.Row="9" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">a</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="2" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">b</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="3" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">c</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="4" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">d</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="5" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">e</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="6" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">f</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="7" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">g</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="8" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">h</TextBlock>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">1</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">2</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">3</TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">4</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">5</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">6</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">7</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">8</TextBlock>
+
+            <TextBlock Grid.Row="1" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">1</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">2</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">3</TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">4</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">5</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">6</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">7</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">8</TextBlock>
         </Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="30,23,0,0" VerticalAlignment="Top" Click="Button_Click"/>
     </Grid>
 </Window>
