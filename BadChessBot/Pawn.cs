@@ -13,8 +13,9 @@ public class Pawn : ChessFigure
 
     public override string FigureSpriteName => Faction==Faction.White? "PawnSprite" : "PawnSprite2";
 
-    public override bool IsAttacking(Coordinate target)
+    public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
+        if (target == Position) return false;
         var offset = target - Position;
         if(Faction==Faction.White) //+y +/-x
         {

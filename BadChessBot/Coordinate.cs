@@ -21,4 +21,16 @@ public struct Coordinate
     }
 
     public static Coordinate operator -(Coordinate a, Coordinate b) => new(a.x-b.x, a.y-b.y);
+    public static Coordinate operator +(Coordinate a, Coordinate b) => new(a.x+b.x, a.y+b.y);
+
+    public static bool operator ==(Coordinate a, Coordinate b) => a.x == b.x && a.y == b.y;
+
+    public static bool operator !=(Coordinate a, Coordinate b) => a.x != b.x || a.y != b.y;
+
+    public override readonly bool Equals(object? obj)
+    {
+        if (obj is Coordinate b)
+            return this == b;
+        return false;
+    }
 }

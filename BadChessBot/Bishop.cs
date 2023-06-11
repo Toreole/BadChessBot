@@ -1,4 +1,6 @@
-﻿namespace BadChessBot;
+﻿using System;
+
+namespace BadChessBot;
 
 public class Bishop : ChessFigure
 {
@@ -10,8 +12,21 @@ public class Bishop : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White? "BishopSprite" : "BishopSprite2";
 
-    public override bool IsAttacking(Coordinate target)
+    public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
-        throw new System.NotImplementedException();
+        if (target == Position)
+            return false;
+        var off = target - Position;
+        var absOff = off.Absolute();
+        //not a diagonal
+        if (absOff.x != absOff.y) 
+            return false;
+        Coordinate direction = new(Math.Sign(off.x), Math.Sign(off.y));
+        for(Coordinate next = Position + direction; next != target; next += direction)
+        {
+            if (!engine.FieldIsEmpty(next))
+                return false;
+        }
+        return true;
     }
 }

@@ -10,8 +10,9 @@ public class Knight : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White? "KnightSprite" : "KnightSprite2";
 
-    public override bool IsAttacking(Coordinate target)
+    public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
-        throw new System.NotImplementedException();
+        var absOff = (target - Position).Absolute();
+        return (absOff.x == 2 && absOff.y == 1) || (absOff.x == 1 && absOff.y == 2);
     }
 }

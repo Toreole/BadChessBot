@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BadChessBot;
 
@@ -123,9 +124,21 @@ public class ChessEngine
                 if(figure!.Faction == factionTurn && (selectedFigure == null || figure!.Faction == selectedFigure.Faction))
                 {
                     ResetHighlights();
-                    highlightedTiles.Add(tiles[x, y]);
-                    tiles[x, y].Fill = Brushes.Orange;
+                    HighlightTile(tiles[x, y], Brushes.Yellow);
                     selectedFigure = figure;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            if (selectedFigure.IsAttacking(new(i, j), this))
+                                HighlightTile(tiles[i, j]);
+                        }
+                    }
+                    foreach(var defender in figuresOnTheBoard.Values.Where(x => x.Faction == selectedFigure.Faction && x.IsAttacking(selectedFigure.Position, this)))
+                    {
+                        var defPos = defender.Position;
+                        HighlightTile(tiles[defPos.x, defPos.y], Brushes.CadetBlue);
+                    }
                 }
                 else if (selectedFigure != null && figure!.Faction != selectedFigure.Faction)
                 {
@@ -145,25 +158,34 @@ public class ChessEngine
             if (highlightedTiles.Contains(rect))
             {
                 highlightedTiles.Remove(rect);
-                rect.Fill = (Grid.GetColumn(rect) - offset) % 2 == (Grid.GetRow(rect) - offset) % 2
-                    ? Brushes.ForestGreen : Brushes.Beige;
+                ResetDefaultColorTile(rect);
             }
             else
             {
-                highlightedTiles.Add(rect);
-                rect.Fill = Brushes.Orange;
+                HighlightTile(rect);
             }
 
             
         }
     }
 
+    private void ResetDefaultColorTile(Rectangle tile)
+    {
+        tile.Fill = (Grid.GetColumn(tile) - offset) % 2 == (Grid.GetRow(tile) - offset) % 2
+                    ? Brushes.ForestGreen : Brushes.Beige;
+    }
+
+    private void HighlightTile(Rectangle tile, Brush? highlightBrush = null)
+    {
+        highlightedTiles.Add(tile);
+        tile.Fill = highlightBrush ?? Brushes.Orange;
+    }
+
     private void ResetHighlights()
     {
         foreach (Rectangle highlighted in highlightedTiles)
         {
-            highlighted.Fill = (Grid.GetColumn(highlighted) - offset) % 2 == (Grid.GetRow(highlighted) - offset) % 2
-                ? Brushes.ForestGreen : Brushes.Beige;
+            ResetDefaultColorTile(highlighted);
         }
         highlightedTiles.Clear();
     }

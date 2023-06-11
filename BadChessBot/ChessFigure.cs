@@ -10,7 +10,7 @@ public abstract class ChessFigure
     public abstract int FigureValue { get; }
     public abstract string FigureSpriteName { get; }
     public bool HasBeenMoved { get; set; } = false;
-    public abstract bool IsAttacking(Coordinate target);
+    public abstract bool IsAttacking(Coordinate target, ChessEngine engine);
     //public abstract Coordinate[] GetPossibleMoves(ChessEngine engine);
 
     private Image sprite;

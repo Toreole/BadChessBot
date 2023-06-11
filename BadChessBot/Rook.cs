@@ -16,8 +16,20 @@ internal class Rook : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White ? "RookSprite" : "RookSprite2";
 
-    public override bool IsAttacking(Coordinate target)
+    public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
-        throw new NotImplementedException();
+        if (target == Position) 
+            return false;
+        var off = target - Position;
+        //not a straight line:
+        if (off.x != 0 && off.y != 0) 
+            return false;
+        Coordinate direction = new(Math.Sign(off.x), Math.Sign(off.y));
+        for(Coordinate next = Position + direction; next != target; next += direction)
+        {
+            if (!engine.FieldIsEmpty(next))
+                return false;
+        }
+        return true;
     }
 }
