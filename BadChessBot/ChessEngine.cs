@@ -24,7 +24,7 @@ public class ChessEngine
 
     private ChessFigure? selectedFigure;
 
-    private Faction factionTurn = Faction.White;
+    //private Faction factionTurn = Faction.White;
 
     public Grid ChessGrid => chessGrid;
     public MainWindow GUIContext => guiContext;
@@ -125,7 +125,8 @@ public class ChessEngine
             Coordinate coord = new(x, y);
             if(TryGetFigureAt(coord, out var figure))
             {
-                if(figure!.Faction == factionTurn && (selectedFigure == null || figure!.Faction == selectedFigure.Faction))
+                //figure!.Faction == factionTurn &&
+                if ( (selectedFigure == null || figure!.Faction == selectedFigure.Faction))
                 {
                     ResetHighlights();
                     HighlightTile(tiles[x, y], Brushes.Yellow);
@@ -217,7 +218,7 @@ public class ChessEngine
         //deselect figure.
         selectedFigure = null;
         //set next players turn.
-        factionTurn = factionTurn.OppositeFaction();
+        //factionTurn = factionTurn.OppositeFaction();
         ResetHighlights();
         UpdateMoveRecommendation();
     }
