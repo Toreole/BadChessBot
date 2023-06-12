@@ -215,6 +215,7 @@ public class ChessEngine
         var sprite = selectedFigure.Sprite;
         Grid.SetColumn(sprite, targetCoord.x + offset);
         Grid.SetRow(sprite, targetCoord.y + offset);
+        selectedFigure.HasBeenMoved = true;
         //deselect figure.
         selectedFigure = null;
         //set next players turn.
