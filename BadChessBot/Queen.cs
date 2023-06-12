@@ -12,6 +12,11 @@ public class Queen : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White ? "QueenSprite" : "QueenSprite2";
 
+    public override bool CanMoveTo(Coordinate target, ChessEngine engine)
+    {
+        return IsAttacking(target, engine) && engine.FactionFigureAt(target, Faction.OppositeFaction());
+    }
+
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
         if (target == Position)

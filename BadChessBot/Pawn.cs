@@ -13,6 +13,22 @@ public class Pawn : ChessFigure
 
     public override string FigureSpriteName => Faction==Faction.White? "PawnSprite" : "PawnSprite2";
 
+    public override bool CanMoveTo(Coordinate target, ChessEngine engine)
+    {
+        if (target == Position) return false;
+        var offset = target - Position;
+        if(Faction == Faction.White)
+        {
+            return (offset.x == 0 && (offset.y == 1 || offset.y == 2 && !HasBeenMoved)) 
+                || (offset.Absolute().x == 1 && offset.y == 1 && engine.FactionFigureAt(target, Faction.OppositeFaction()));
+        }
+        else
+        {
+            return (offset.x == 0 && (offset.y == -1 || offset.y == -2 && !HasBeenMoved))
+                || (offset.Absolute().x == 1 && offset.y == -1 && engine.FactionFigureAt(target, Faction.OppositeFaction()));
+        }
+    }
+
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
         if (target == Position) return false;

@@ -12,6 +12,11 @@ public class Bishop : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White? "BishopSprite" : "BishopSprite2";
 
+    public override bool CanMoveTo(Coordinate target, ChessEngine engine)
+    {
+        return IsAttacking(target, engine) && engine.FactionFigureAt(target, Faction.OppositeFaction());
+    }
+
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
         if (target == Position)

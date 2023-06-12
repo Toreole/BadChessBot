@@ -33,4 +33,15 @@ public struct Coordinate
             return this == b;
         return false;
     }
+
+    /// <summary>
+    /// returns a1 to h8
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString()
+    {
+        const int a = 'a';
+        char c = (char)(a + x);
+        return $"{c}{y+1}";
+    }
 }

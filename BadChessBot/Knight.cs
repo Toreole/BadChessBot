@@ -10,6 +10,11 @@ public class Knight : ChessFigure
 
     public override string FigureSpriteName => Faction == Faction.White? "KnightSprite" : "KnightSprite2";
 
+    public override bool CanMoveTo(Coordinate target, ChessEngine engine)
+    {
+        return IsAttacking(target, engine) && engine.FactionFigureAt(target, Faction.OppositeFaction());
+    }
+
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
         var absOff = (target - Position).Absolute();

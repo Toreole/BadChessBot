@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BadChessBot;
 
@@ -28,6 +29,8 @@ public class ChessEngine
     public Grid ChessGrid => chessGrid;
     public MainWindow GUIContext => guiContext;
 
+    Random random = new();
+
     public ChessEngine(Grid grid, int offset, MainWindow contextWindow)
     {
         this.chessGrid = grid;
@@ -36,7 +39,7 @@ public class ChessEngine
         contextWindow.BotRecommendationLabel.Content = "Nothing here quite yet";
     }
 
-    public bool TryGetFigureAt(Coordinate coord, out ChessFigure? figure)
+    public bool TryGetFigureAt(Coordinate coord, [MaybeNullWhen(false)] out ChessFigure? figure)
     {
         return figuresOnTheBoard.TryGetValue(coord, out figure);
     }
@@ -50,6 +53,7 @@ public class ChessEngine
     {
         SetupChessFieldTiles();
         PlacePiecesInDefaultPositions();
+        guiContext.RetryButton.Click += (_, _) => UpdateMoveRecommendation();
     }
 
     private void PlacePiecesInDefaultPositions()
@@ -221,6 +225,101 @@ public class ChessEngine
     private void UpdateMoveRecommendation()
     {
         //guiContext.BotRecommendationLabel.Content = ...
+        string recommendation = "";
+        recommendation += "White: " + GetMoveFor(Faction.White) + '\n';
+        recommendation += "Black: " + GetMoveFor(Faction.Black);
+        guiContext.BotRecommendationLabel.Content = recommendation;
+    }
+
+    private string GetMoveFor(Faction faction)
+    {
+        ChessFigure[] figuresInPlay = figuresOnTheBoard.Values.Where(x => x.Faction == faction).ToArray();
+        King king = (King)figuresInPlay.Where(x => x is King).First();
+        if(figuresInPlay.Length <= 3)
+        {
+            return GetBestMoveForPieces(figuresInPlay, king);
+        }
+        var chosenFigures = figuresInPlay.OrderBy(x => random.Next(100)).ToArray();
+        return GetBestMoveForPieces(chosenFigures, king);
+    }
+
+    private string GetBestMoveForPieces(ChessFigure[] figures, King alliedKing)
+    {
+        List<Move> allowedMoves = new();
+        for (int i = 0; i < figures.Length && i < 3; i++)
+        {
+            var figure = figures[i];
+            foreach (var target in TileOnBoard())
+            {
+                if (figure.CanMoveTo(target, this))
+                {
+                    Move move = new(target, figure);
+                    if (IsMoveLegal(move, alliedKing))
+                    {
+                        allowedMoves.Add(move);
+                        //now calculate the expected value from this move.
+                        //based on a few things:
+                        //1. value of the piece being taken (if there is one)
+                        //2. whether the target coord is attacked by the enemy AND defended by your own pieces.
+                        if(TryGetFigureAt(target, out var takenFigure))
+                        {
+                            move.ExpectedValue += takenFigure!.FigureValue;
+                        }
+                        if(figuresOnTheBoard.Values.Any(f => f.Faction != figure.Faction && f.IsAttacking(target, this)))
+                        {
+                            move.ExpectedValue -= figure.FigureValue;
+                        }
+                        if(figuresOnTheBoard.Values.Any(f => f != figure && f.Faction == figure.Faction && f.IsAttacking(target, this)))
+                        {
+                            move.ExpectedValue += 1;
+                        }
+                    }
+                }
+            }
+        }
+        return allowedMoves.OrderByDescending(move => move.ExpectedValue).FirstOrDefault()?.ToString() ?? "no move";
+    }
+
+    private static IEnumerable<Coordinate> TileOnBoard()
+    {
+        for(int x = 0; x < 8; x++)
+            for (int y = 0; y < 8; y++)
+                yield return new Coordinate(x, y);
+    }
+
+    private bool IsMoveLegal(Move move, King alliedKing)
+    {
+        //preview the move.
+        figuresOnTheBoard.Remove(move.FigureToMove.Position);
+        if (TryGetFigureAt(move.TargetPosition, out ChessFigure? otherFigure) && otherFigure!.Faction == move.FigureToMove.Faction)
+        {
+            //cant take allied piece.
+            return false;
+        }
+        figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
+        //check check
+        bool inCheck = figuresOnTheBoard.Values.Any(x => x.Faction != alliedKing.Faction && x.IsAttacking(alliedKing.Position, this));
+        //revert the preview.
+        figuresOnTheBoard.Add(move.FigureToMove.Position, move.FigureToMove);
+        if(otherFigure != null)
+        {
+            figuresOnTheBoard[move.TargetPosition] = otherFigure;
+        }
+        else
+        {
+            figuresOnTheBoard.Remove(move.TargetPosition);
+        }
+        return !inCheck;
+    }
+
+    public bool FactionAttacksTile(Faction faction, Coordinate tile)
+    {
+        foreach(var figure in figuresOnTheBoard.Values.Where(x => x.Faction == faction))
+        {
+            if (figure.IsAttacking(tile, this))
+                return true;
+        }
+        return false;
     }
 
     internal bool FactionFigureAt(Coordinate coord, Faction faction)
@@ -230,5 +329,28 @@ public class ChessEngine
             return figure!.Faction == faction;
         }
         return false;
+    }
+
+    private class Move
+    {
+        public Coordinate TargetPosition { get; }
+        public ChessFigure FigureToMove { get; }
+        public int ExpectedValue { get; set; }
+
+        public Move(Coordinate targetPos, ChessFigure figure, int expectedValue = 0)
+        {
+            TargetPosition = targetPos;
+            FigureToMove = figure;
+            ExpectedValue = expectedValue;
+        }
+
+        /// <summary>
+        /// returns the move as a readable string specifying the figure and target position
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{FigureToMove.GetType().Name} from {FigureToMove.Position} to {TargetPosition}";
+        }
     }
 }
