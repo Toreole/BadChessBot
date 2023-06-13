@@ -19,12 +19,12 @@ public class Pawn : ChessFigure
         var offset = target - Position;
         if(Faction == Faction.White)
         {
-            return (offset.x == 0 && (offset.y == 1 || offset.y == 2 && !HasBeenMoved)) 
+            return (offset.x == 0 && (offset.y == 1 || offset.y == 2 && !HasBeenMoved) && engine.FieldIsEmpty(target)) 
                 || (offset.Absolute().x == 1 && offset.y == 1 && engine.FactionFigureAt(target, Faction.OppositeFaction()));
         }
         else
         {
-            return (offset.x == 0 && (offset.y == -1 || offset.y == -2 && !HasBeenMoved))
+            return (offset.x == 0 && (offset.y == -1 || offset.y == -2 && !HasBeenMoved) && engine.FieldIsEmpty(target))
                 || (offset.Absolute().x == 1 && offset.y == -1 && engine.FactionFigureAt(target, Faction.OppositeFaction()));
         }
     }

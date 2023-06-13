@@ -8,13 +8,13 @@ public class Queen : ChessFigure
     {
     }
 
-    public override int FigureValue => 9;
+    public override int FigureValue => 20;
 
     public override string FigureSpriteName => Faction == Faction.White ? "QueenSprite" : "QueenSprite2";
 
     public override bool CanMoveTo(Coordinate target, ChessEngine engine)
     {
-        return IsAttacking(target, engine) && engine.FactionFigureAt(target, Faction.OppositeFaction());
+        return IsAttacking(target, engine);
     }
 
     public override bool IsAttacking(Coordinate target, ChessEngine engine)

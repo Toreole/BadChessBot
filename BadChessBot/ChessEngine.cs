@@ -7,11 +7,26 @@ using System.Windows.Shapes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Windows.Documents;
 
 namespace BadChessBot;
 
 public class ChessEngine
 {
+    static readonly Coordinate[] tilesOnBoard;
+
+    static ChessEngine()
+    {
+        tilesOnBoard = new Coordinate[64];
+        for(int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                tilesOnBoard[x * 8 + y] = new(x, y);
+            }
+        }
+    }
+
     readonly Grid chessGrid;
     readonly int offset = 0;
     readonly MainWindow guiContext;
@@ -248,10 +263,10 @@ public class ChessEngine
     private string GetBestMoveForPieces(ChessFigure[] figures, King alliedKing)
     {
         List<Move> allowedMoves = new();
-        for (int i = 0; i < figures.Length && i < 3; i++)
+        for (int i = 0; i < figures.Length && (i < 3 || allowedMoves.Count == 0); i++)
         {
             var figure = figures[i];
-            foreach (var target in TileOnBoard())
+            foreach (var target in tilesOnBoard)
             {
                 if (figure.CanMoveTo(target, this))
                 {
@@ -271,38 +286,47 @@ public class ChessEngine
                         {
                             move.ExpectedValue -= figure.FigureValue;
                         }
-                        if(figuresOnTheBoard.Values.Any(f => f != figure && f.Faction == figure.Faction && f.IsAttacking(target, this)))
-                        {
-                            move.ExpectedValue += 1;
-                        }
+                        //add distance value to favor longer moves instead of always just moving pawns 1 piece.
+                        move.ExpectedValue += figure.GetDistanceValue(target);
                     }
                 }
             }
         }
-        return allowedMoves.OrderByDescending(move => move.ExpectedValue).FirstOrDefault()?.ToString() ?? "no move";
-    }
-
-    private static IEnumerable<Coordinate> TileOnBoard()
-    {
-        for(int x = 0; x < 8; x++)
-            for (int y = 0; y < 8; y++)
-                yield return new Coordinate(x, y);
+        var selectedMove = allowedMoves.OrderByDescending(move => move.ExpectedValue).FirstOrDefault();
+        if(selectedMove != null)
+        {
+            if(selectedMove.FigureToMove is Queen)
+            {
+                var x = 0;
+            }
+        }
+        return selectedMove?.ToString() ?? "no move";
     }
 
     private bool IsMoveLegal(Move move, King alliedKing)
     {
         //preview the move.
-        figuresOnTheBoard.Remove(move.FigureToMove.Position);
+        Coordinate originalPiecePosition = move.FigureToMove.Position;
+        figuresOnTheBoard.Remove(originalPiecePosition);
+        move.FigureToMove.Position = move.TargetPosition;
         if (TryGetFigureAt(move.TargetPosition, out ChessFigure? otherFigure) && otherFigure!.Faction == move.FigureToMove.Faction)
         {
             //cant take allied piece.
+            figuresOnTheBoard[move.TargetPosition] = otherFigure;
+            figuresOnTheBoard[originalPiecePosition] = move.FigureToMove;
+            move.FigureToMove.Position = originalPiecePosition;
             return false;
         }
         figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
+        //add value if the piece will be defended after moving:
+        if (figuresOnTheBoard.Values.Any(f => f != move.FigureToMove && f.Faction == move.FigureToMove.Faction && f.IsAttacking(move.TargetPosition, this)))
+        {
+            move.ExpectedValue += 1;
+        }
         //check check
         bool inCheck = figuresOnTheBoard.Values.Any(x => x.Faction != alliedKing.Faction && x.IsAttacking(alliedKing.Position, this));
         //revert the preview.
-        figuresOnTheBoard.Add(move.FigureToMove.Position, move.FigureToMove);
+        figuresOnTheBoard.Add(originalPiecePosition, move.FigureToMove);
         if(otherFigure != null)
         {
             figuresOnTheBoard[move.TargetPosition] = otherFigure;
@@ -311,6 +335,7 @@ public class ChessEngine
         {
             figuresOnTheBoard.Remove(move.TargetPosition);
         }
+        move.FigureToMove.Position = originalPiecePosition;
         return !inCheck;
     }
 

@@ -17,6 +17,7 @@ public class Knight : ChessFigure
 
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
     {
+        if (target == Position) return false;
         var absOff = (target - Position).Absolute();
         return (absOff.x == 2 && absOff.y == 1) || (absOff.x == 1 && absOff.y == 2);
     }
