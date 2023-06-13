@@ -14,7 +14,7 @@ public class Bishop : ChessFigure
 
     public override bool CanMoveTo(Coordinate target, ChessEngine engine)
     {
-        return IsAttacking(target, engine) && engine.FactionFigureAt(target, Faction.OppositeFaction());
+        return IsAttacking(target, engine);
     }
 
     public override bool IsAttacking(Coordinate target, ChessEngine engine)
