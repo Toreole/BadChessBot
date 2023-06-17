@@ -9,6 +9,7 @@ public abstract class ChessFigure
 {
     public Faction Faction { get; set; } = Faction.White;
     public Coordinate Position { get; internal set; }
+    public Coordinate StartingPosition { get; }
     public abstract int FigureValue { get; }
     public abstract string FigureSpriteName { get; }
     public bool HasBeenMoved { get; set; } = false;
@@ -37,6 +38,7 @@ public abstract class ChessFigure
     public ChessFigure(int x, int y, Faction faction, ChessEngine engine)
     {
         Position = new(x, y);
+        StartingPosition = Position;
         Faction = faction;
 
         sprite = engine.CreateSpriteOnBoard(Position, FigureSpriteName);

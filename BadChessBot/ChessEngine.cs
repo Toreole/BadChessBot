@@ -52,6 +52,7 @@ public class ChessEngine
         this.offset = offset;
         guiContext = contextWindow;
         contextWindow.BotRecommendationLabel.Content = "Nothing here quite yet";
+        contextWindow.ResetButton.Click += (_, _) => ResetBoard();
     }
 
     public bool TryGetFigureAt(Coordinate coord, [MaybeNullWhen(false)] out ChessFigure? figure)
@@ -186,6 +187,35 @@ public class ChessEngine
             }
 
             
+        }
+    }
+
+    private void ResetBoard()
+    {
+        List<ChessFigure> allFigures = new List<ChessFigure>(32);
+        allFigures.AddRange(figuresOnTheBoard.Values);
+        allFigures.AddRange(takenFigures);
+
+        figuresOnTheBoard.Clear();
+        takenFigures.Clear();
+        ResetHighlights();
+
+        foreach(var figure in allFigures)
+        {
+            figure.Position = figure.StartingPosition;
+            figure.HasBeenMoved = false;
+            var pos = figure.Position;
+            var sprite = figure.Sprite;
+            bool wasTaken = Grid.GetColumn(sprite) == 0;
+            Grid.SetColumn(sprite, pos.x + offset);
+            Grid.SetRow(sprite, pos.y + offset);
+            if(wasTaken)
+            {
+                guiContext.TakenPiecesStackPanel.Children.Remove(sprite);
+                chessGrid.Children.Add(sprite);
+            }
+
+            figuresOnTheBoard.Add(pos, figure);
         }
     }
 
