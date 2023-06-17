@@ -243,12 +243,12 @@ public class ChessEngine
     {
         //guiContext.BotRecommendationLabel.Content = ...
         string recommendation = "";
-        recommendation += "White: " + GetMoveFor(Faction.White) + '\n';
-        recommendation += "Black: " + GetMoveFor(Faction.Black);
+        recommendation += "White: " + (GetMoveFor(Faction.White)?.ToString() ?? "none") + '\n';
+        recommendation += "Black: " + (GetMoveFor(Faction.Black)?.ToString() ?? "none");
         guiContext.BotRecommendationLabel.Content = recommendation;
     }
 
-    private string GetMoveFor(Faction faction)
+    private Move? GetMoveFor(Faction faction)
     {
         ChessFigure[] figuresInPlay = figuresOnTheBoard.Values.Where(x => x.Faction == faction).ToArray();
         King king = (King)figuresInPlay.Where(x => x is King).First();
@@ -260,10 +260,12 @@ public class ChessEngine
         return GetBestMoveForPieces(chosenFigures, king);
     }
 
-    private string GetBestMoveForPieces(ChessFigure[] figures, King alliedKing)
+    private Move? GetBestMoveForPieces(ChessFigure[] figures, King alliedKing)
     {
+        Faction enemyFaction = alliedKing.Faction.OppositeFaction();
+        King enemyKing = (King)figuresOnTheBoard.Values.First(x => x is King && x.Faction == enemyFaction);
         List<Move> allowedMoves = new();
-        for (int i = 0; i < figures.Length && (i < 3 || allowedMoves.Count == 0); i++)
+        for (int i = 0; i < figures.Length && (i < 5 || allowedMoves.Count == 0); i++)
         {
             var figure = figures[i];
             foreach (var target in tilesOnBoard)
@@ -288,36 +290,38 @@ public class ChessEngine
                         }
                         //add distance value to favor longer moves instead of always just moving pawns 1 piece.
                         move.ExpectedValue += figure.GetDistanceValue(target);
+
+                        takenFigure = PreviewMove(move, out Coordinate originalPosition);
+                        //add value to moves that do check (+1)
+                        if(figures.Any(x => x.IsAttacking(enemyKing.Position, this)))
+                        {
+                            move.ExpectedValue += 1;
+                            //add value to moves that do checkmate (+1000)
+                            if(GetMoveFor(enemyFaction) == null)
+                            {
+                                move.ExpectedValue += 1000;
+                            }
+                        }
+                        RevertMovePreview(move, originalPosition, takenFigure);
                     }
                 }
             }
         }
         var selectedMove = allowedMoves.OrderByDescending(move => move.ExpectedValue).FirstOrDefault();
-        if(selectedMove != null)
-        {
-            if(selectedMove.FigureToMove is Queen)
-            {
-                var x = 0;
-            }
-        }
-        return selectedMove?.ToString() ?? "no move";
+        return selectedMove;
     }
 
     private bool IsMoveLegal(Move move, King alliedKing)
     {
         //preview the move.
-        Coordinate originalPiecePosition = move.FigureToMove.Position;
-        figuresOnTheBoard.Remove(originalPiecePosition);
-        move.FigureToMove.Position = move.TargetPosition;
-        if (TryGetFigureAt(move.TargetPosition, out ChessFigure? otherFigure) && otherFigure!.Faction == move.FigureToMove.Faction)
+        ChessFigure? otherFigure = PreviewMove(move, out Coordinate orignalPosition);
+        
+        if (otherFigure != null && otherFigure.Faction == move.FigureToMove.Faction)
         {
             //cant take allied piece.
-            figuresOnTheBoard[move.TargetPosition] = otherFigure;
-            figuresOnTheBoard[originalPiecePosition] = move.FigureToMove;
-            move.FigureToMove.Position = originalPiecePosition;
+            RevertMovePreview(move, orignalPosition, otherFigure);
             return false;
         }
-        figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
         //add value if the piece will be defended after moving:
         if (figuresOnTheBoard.Values.Any(f => f != move.FigureToMove && f.Faction == move.FigureToMove.Faction && f.IsAttacking(move.TargetPosition, this)))
         {
@@ -326,17 +330,32 @@ public class ChessEngine
         //check check
         bool inCheck = figuresOnTheBoard.Values.Any(x => x.Faction != alliedKing.Faction && x.IsAttacking(alliedKing.Position, this));
         //revert the preview.
-        figuresOnTheBoard.Add(originalPiecePosition, move.FigureToMove);
-        if(otherFigure != null)
+        RevertMovePreview(move, orignalPosition, otherFigure);
+        return !inCheck;
+    }
+
+    private ChessFigure? PreviewMove(Move move, out Coordinate originalPosition)
+    {
+        ChessFigure? takenFigure = figuresOnTheBoard.ContainsKey(move.TargetPosition) ? figuresOnTheBoard[move.TargetPosition] : null;
+        originalPosition = move.FigureToMove.Position;
+        figuresOnTheBoard.Remove(originalPosition);
+        move.FigureToMove.Position = move.TargetPosition;
+        figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
+        return takenFigure;
+    }
+
+    private void RevertMovePreview(Move move, Coordinate originalPosition, ChessFigure? takenFigure)
+    {
+        figuresOnTheBoard.Add(originalPosition, move.FigureToMove);
+        move.FigureToMove.Position = originalPosition;
+        if (takenFigure != null)
         {
-            figuresOnTheBoard[move.TargetPosition] = otherFigure;
+            figuresOnTheBoard[move.TargetPosition] = takenFigure;
         }
         else
         {
             figuresOnTheBoard.Remove(move.TargetPosition);
         }
-        move.FigureToMove.Position = originalPiecePosition;
-        return !inCheck;
     }
 
     public bool FactionAttacksTile(Faction faction, Coordinate tile)
