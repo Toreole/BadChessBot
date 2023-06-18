@@ -8,7 +8,18 @@ namespace BadChessBot;
 public abstract class ChessFigure 
 {
     public Faction Faction { get; set; } = Faction.White;
-    public Coordinate Position { get; internal set; }
+
+    private Coordinate currentPosition;
+    private Coordinate previousPosition;
+
+    public Coordinate Position
+    {
+        get => currentPosition; internal set
+        {
+            previousPosition = currentPosition;
+            currentPosition = value;
+        }
+    }
     public Coordinate StartingPosition { get; }
     public abstract int FigureValue { get; }
     public abstract string FigureSpriteName { get; }
@@ -28,11 +39,12 @@ public abstract class ChessFigure
             //give value to promotions
             //if ((Faction == Faction.White && target.y == 7) || (Faction == Faction.Black && target.x == 0)) return 15;
         }
-        if (this is Bishop) val = absOffset.x; //x/y doesnt matter its the same.
+        if (this is Bishop) val = 1; //x/y doesnt matter its the same.
         if (this is Queen or Rook) val = 1;//absOffset.x == 0? absOffset.y : absOffset.y;
         if (this is Knight) val = 1;
         if (this is King) val = 0;
         if (target == StartingPosition) val--;
+        if (target == previousPosition) val -= 2;
 
         return Math.Min(2,val);
     }

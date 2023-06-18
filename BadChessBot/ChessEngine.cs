@@ -356,7 +356,8 @@ public class ChessEngine
     private Move? GetMoveFor(Faction faction, int recursiveSearches = 1)
     {
         ChessFigure[] figuresInPlay = figuresOnTheBoard.Values.Where(x => x.Faction == faction).ToArray();
-        King king = (King)figuresInPlay.Where(x => x is King).First();
+        King? king = (King?)figuresInPlay.Where(x => x is King).FirstOrDefault();
+        if (king == null) return null;
         return GetBestMoveForPieces(figuresInPlay, king, recursiveSearches);
     }
 
