@@ -15,6 +15,8 @@ namespace BadChessBot
 
         private ChessEngine chessEngine;
 
+        public event Action<object, RoutedEventArgs>? OnPromotionClick;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -22,6 +24,9 @@ namespace BadChessBot
             chessEngine.Setup();
         }
 
-        
+        private void Promotion_Button_Click(object sender, RoutedEventArgs e)
+        {
+            OnPromotionClick?.Invoke(sender, e);
+        }
     }
 }

@@ -8,6 +8,19 @@ public class Queen : ChessFigure
     {
     }
 
+    private Queen() : base()
+    {
+    }
+
+    public static Queen CreateSilent(Coordinate pos, Faction faction)
+    {
+        return new Queen()
+        {
+            Position = pos,
+            Faction = faction
+        };
+    }
+
     public override int FigureValue => 20;
 
     public override string FigureSpriteName => Faction == Faction.White ? "QueenSprite" : "QueenSprite2";

@@ -22,11 +22,17 @@ public abstract class ChessFigure
         var offset = target - Position;
         var absOffset = offset.Absolute();
         int val = 0;
-        if (this is Pawn) val = absOffset.y;
+        if (this is Pawn)
+        {
+            val = absOffset.y + absOffset.x;
+            //give value to promotions
+            //if ((Faction == Faction.White && target.y == 7) || (Faction == Faction.Black && target.x == 0)) return 15;
+        }
         if (this is Bishop) val = absOffset.x; //x/y doesnt matter its the same.
-        if (this is Queen or Rook) val = absOffset.x == 0? absOffset.y : absOffset.y;
+        if (this is Queen or Rook) val = 1;//absOffset.x == 0? absOffset.y : absOffset.y;
         if (this is Knight) val = 1;
         if (this is King) val = 0;
+        if (target == StartingPosition) val--;
 
         return Math.Min(2,val);
     }
@@ -42,5 +48,11 @@ public abstract class ChessFigure
         Faction = faction;
 
         sprite = engine.CreateSpriteOnBoard(Position, FigureSpriteName);
+    }
+
+    protected ChessFigure()
+    {
+        sprite = new Image();
+        StartingPosition = new(-1, -1);
     }
 }

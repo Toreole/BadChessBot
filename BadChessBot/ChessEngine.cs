@@ -13,6 +13,7 @@ namespace BadChessBot;
 
 public class ChessEngine
 {
+    const int searchDepth = 3;
     static readonly Coordinate[] tilesOnBoard;
 
     static ChessEngine()
@@ -53,6 +54,8 @@ public class ChessEngine
         guiContext = contextWindow;
         contextWindow.BotRecommendationLabel.Content = "Nothing here quite yet";
         contextWindow.ResetButton.Click += (_, _) => ResetBoard();
+        contextWindow.OnPromotionClick += PlacePieceButtonClick;
+        contextWindow.PromotionPopup.Visibility = Visibility.Hidden;
     }
 
     public bool TryGetFigureAt(Coordinate coord, [MaybeNullWhen(false)] out ChessFigure? figure)
@@ -202,6 +205,12 @@ public class ChessEngine
 
         foreach(var figure in allFigures)
         {
+            //figures from promotion should not be reset to any position and just get deleted.
+            if(figure.StartingPosition.x == -1)
+            {
+                chessGrid.Children.Remove(figure.Sprite);
+                continue;
+            }
             figure.Position = figure.StartingPosition;
             figure.HasBeenMoved = false;
             var pos = figure.Position;
@@ -245,13 +254,20 @@ public class ChessEngine
         if (selectedFigure == null) return;
         if (TryGetFigureAt(targetCoord, out var figure))
         {
-            takenFigures.Add(figure!);
-            figuresOnTheBoard.Remove(targetCoord);
             var takenSprite = figure!.Sprite;
-            Grid.SetColumn(takenSprite, 0);
-            Grid.SetRow(takenSprite, 0);
             chessGrid.Children.Remove(takenSprite);
-            guiContext.TakenPiecesStackPanel.Children.Add(takenSprite);
+            figuresOnTheBoard.Remove(targetCoord);
+            if (figure!.StartingPosition.x == -1)
+            {
+
+            }
+            else
+            {
+                takenFigures.Add(figure!);
+                Grid.SetColumn(takenSprite, 0);
+                Grid.SetRow(takenSprite, 0);
+                guiContext.TakenPiecesStackPanel.Children.Add(takenSprite);
+            }
         }
         var oldCoord = selectedFigure.Position;
         figuresOnTheBoard.Remove(oldCoord);
@@ -262,10 +278,69 @@ public class ChessEngine
         Grid.SetRow(sprite, targetCoord.y + offset);
         selectedFigure.HasBeenMoved = true;
         //deselect figure.
-        selectedFigure = null;
-        //set next players turn.
-        //factionTurn = factionTurn.OppositeFaction();
         ResetHighlights();
+        if (MoveIsPromotion(selectedFigure!, targetCoord))
+        {
+            SelectPromotedPiece(selectedFigure.Faction, targetCoord);
+        }
+        else
+        {
+            UpdateMoveRecommendation();
+        }
+        selectedFigure = null;
+    }
+
+    private Faction promoteFigureFaction;
+    private Coordinate promoteFigureTile;
+
+    private void SelectPromotedPiece(Faction owningFaction, Coordinate tile)
+    {
+        promoteFigureFaction = owningFaction;
+        promoteFigureTile = tile;
+        guiContext.PromotionPopup.Visibility = Visibility.Visible;
+    }
+
+    private void PlacePieceButtonClick(object sender, RoutedEventArgs e)
+    {
+        if(sender is Button b)
+        {
+            if(b.Tag is string str)
+            {
+                var pawn = figuresOnTheBoard[promoteFigureTile];
+                var sprite = pawn.Sprite;
+                chessGrid.Children.Remove(sprite);
+                takenFigures.Add(pawn);
+                Grid.SetColumn(sprite, 0);
+                Grid.SetRow(sprite, 0);
+                guiContext.TakenPiecesStackPanel.Children.Add(sprite);
+
+                ChessFigure? promotedFigure = null;
+                switch(str)
+                {
+                    case "QUEEN":
+                    default:
+                        promotedFigure = new Queen(-1, -1, promoteFigureFaction, this);
+                        break;
+                    case "ROOK":
+                        promotedFigure = new Rook(-1, -1, promoteFigureFaction, this);
+                        break;
+                    case "KNIGHT":
+                        promotedFigure = new Knight(-1, -1, promoteFigureFaction, this);
+                        break;
+                    case "BISHOP":
+                        promotedFigure = new Bishop(-1, -1, promoteFigureFaction, this);
+                        break;
+                }
+                if(promotedFigure != null)
+                {
+                    promotedFigure.Position = promoteFigureTile;
+                    sprite = promotedFigure.Sprite;
+                    Grid.SetColumn(sprite, promoteFigureTile.x + offset);
+                    Grid.SetRow(sprite, promoteFigureTile.y + offset);
+                }
+            }
+        }
+        guiContext.PromotionPopup.Visibility = Visibility.Hidden;
         UpdateMoveRecommendation();
     }
 
@@ -273,29 +348,24 @@ public class ChessEngine
     {
         //guiContext.BotRecommendationLabel.Content = ...
         string recommendation = "";
-        recommendation += "White: " + (GetMoveFor(Faction.White)?.ToString() ?? "none") + '\n';
-        recommendation += "Black: " + (GetMoveFor(Faction.Black)?.ToString() ?? "none");
+        recommendation += "White: " + (GetMoveFor(Faction.White, searchDepth)?.ToString() ?? "none") + '\n';
+        recommendation += "Black: " + (GetMoveFor(Faction.Black, searchDepth)?.ToString() ?? "none");
         guiContext.BotRecommendationLabel.Content = recommendation;
     }
 
-    private Move? GetMoveFor(Faction faction)
+    private Move? GetMoveFor(Faction faction, int recursiveSearches = 1)
     {
         ChessFigure[] figuresInPlay = figuresOnTheBoard.Values.Where(x => x.Faction == faction).ToArray();
         King king = (King)figuresInPlay.Where(x => x is King).First();
-        if(figuresInPlay.Length <= 3)
-        {
-            return GetBestMoveForPieces(figuresInPlay, king);
-        }
-        var chosenFigures = figuresInPlay.OrderBy(x => random.Next(100)).ToArray();
-        return GetBestMoveForPieces(chosenFigures, king);
+        return GetBestMoveForPieces(figuresInPlay, king, recursiveSearches);
     }
 
-    private Move? GetBestMoveForPieces(ChessFigure[] figures, King alliedKing)
+    private Move? GetBestMoveForPieces(ChessFigure[] figures, King alliedKing, int recursiveSearches = 1)
     {
         Faction enemyFaction = alliedKing.Faction.OppositeFaction();
         King enemyKing = (King)figuresOnTheBoard.Values.First(x => x is King && x.Faction == enemyFaction);
         List<Move> allowedMoves = new();
-        for (int i = 0; i < figures.Length && (i < 5 || allowedMoves.Count == 0); i++)
+        for (int i = 0; i < figures.Length; i++)
         {
             var figure = figures[i];
             foreach (var target in tilesOnBoard)
@@ -313,6 +383,7 @@ public class ChessEngine
                         if(TryGetFigureAt(target, out var takenFigure))
                         {
                             move.ExpectedValue += takenFigure!.FigureValue;
+                            move.ExpectedValue += 1; //add another one point of value.
                         }
                         if(figuresOnTheBoard.Values.Any(f => f.Faction != figure.Faction && f.IsAttacking(target, this)))
                         {
@@ -320,16 +391,29 @@ public class ChessEngine
                         }
                         //add distance value to favor longer moves instead of always just moving pawns 1 piece.
                         move.ExpectedValue += figure.GetDistanceValue(target);
+                        if(move.IsPromotion)
+                        {
+                            move.ExpectedValue += 15;
+                        }
 
                         takenFigure = PreviewMove(move, out Coordinate originalPosition);
-                        //add value to moves that do check (+1)
-                        if(figures.Any(x => x.IsAttacking(enemyKing.Position, this)))
+                        //look ahead to figure out the opponents best move:
+                        if(recursiveSearches > 0)
                         {
-                            move.ExpectedValue += 1;
-                            //add value to moves that do checkmate (+1000)
-                            if(GetMoveFor(enemyFaction) == null)
+                            Move? bestOpponentMove = GetMoveFor(enemyFaction, recursiveSearches - 1);
+                            if (bestOpponentMove != null)
                             {
-                                move.ExpectedValue += 1000;
+                                move.ExpectedValue -= bestOpponentMove.ExpectedValue;
+                            }
+                            //add value to moves that do check (+1)
+                            if (figures.Any(x => x.IsAttacking(enemyKing.Position, this)))
+                            {
+                                move.ExpectedValue += 1;
+                                //add value to moves that do checkmate (+1000)
+                                if (bestOpponentMove == null)
+                                {
+                                    move.ExpectedValue += 1000;
+                                }
                             }
                         }
                         RevertMovePreview(move, originalPosition, takenFigure);
@@ -337,7 +421,12 @@ public class ChessEngine
                 }
             }
         }
-        var selectedMove = allowedMoves.OrderByDescending(move => move.ExpectedValue).FirstOrDefault();
+        if (allowedMoves.Count == 0)
+            return null;
+        var maxValueMoves = allowedMoves.OrderByDescending(move => move.ExpectedValue)
+            .Where(move => move.ExpectedValue == allowedMoves.Max(move => move.ExpectedValue))
+            .ToArray();
+        var selectedMove = maxValueMoves[random.Next(maxValueMoves.Length)];
         return selectedMove;
     }
 
@@ -370,7 +459,14 @@ public class ChessEngine
         originalPosition = move.FigureToMove.Position;
         figuresOnTheBoard.Remove(originalPosition);
         move.FigureToMove.Position = move.TargetPosition;
-        figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
+        if (move.IsPromotion)
+        {
+            figuresOnTheBoard[move.TargetPosition] = Queen.CreateSilent(move.TargetPosition, move.FigureToMove.Faction);
+        }
+        else
+        {
+            figuresOnTheBoard[move.TargetPosition] = move.FigureToMove;
+        }
         return takenFigure;
     }
 
@@ -407,6 +503,13 @@ public class ChessEngine
         return false;
     }
 
+    public static bool MoveIsPromotion(ChessFigure figure, Coordinate targetPosition)
+    {
+        return figure is Pawn &&
+                    ((targetPosition.y is 7 && figure.Faction is Faction.White)
+                      || (targetPosition.y is 0 && figure.Faction is Faction.Black));
+    }
+
     private class Move
     {
         public Coordinate TargetPosition { get; }
@@ -428,5 +531,8 @@ public class ChessEngine
         {
             return $"{FigureToMove.GetType().Name} from {FigureToMove.Position} to {TargetPosition}";
         }
+
+        public bool IsPromotion => MoveIsPromotion(FigureToMove, TargetPosition);
+        
     }
 }

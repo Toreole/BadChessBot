@@ -91,5 +91,16 @@
             <TextBlock Grid.Row="7" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">7</TextBlock>
             <TextBlock Grid.Row="8" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">8</TextBlock>
         </Grid>
+        <Grid x:Name="PromotionPopup" Background="#AA303030">
+            <Grid Background="#FFFFFF" Width="500" Height="200">
+                <Label>PROMOTE</Label>
+                <StackPanel Margin="20 40 20 0">
+                    <Button Click="Promotion_Button_Click" Tag="QUEEN">Queen</Button>
+                    <Button Click="Promotion_Button_Click" Tag="ROOK">Rook</Button>
+                    <Button Click="Promotion_Button_Click" Tag="KNIGHT">Knight</Button>
+                    <Button Click="Promotion_Button_Click" Tag="BISHOP">Bishop</Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
