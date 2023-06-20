@@ -107,7 +107,7 @@ public class ChessEngine
         var found = guiContext.FindResource(spriteResourceKey);
         Image img = new() { Width = 50, Height = 50, Source = found as BitmapImage };
         Grid.SetColumn(img, coord.x+offset);
-        Grid.SetRow(img, coord.y+offset);
+        Grid.SetRow(img, 7-coord.y+offset);
         Panel.SetZIndex(img, 100);
         chessGrid.Children.Add(img);
         img.MouseDown += ChessTileClicked;
@@ -122,7 +122,7 @@ public class ChessEngine
             {
                 var rect = new Rectangle
                 {
-                    Fill = (i % 2) == (j % 2) ? Brushes.ForestGreen : Brushes.Beige,
+                    Fill = (i % 2) == (j % 2) ? Brushes.Beige : Brushes.ForestGreen,
                     Width = 50,
                     Height = 50
                 };
@@ -140,7 +140,7 @@ public class ChessEngine
         if (sender is Image image)
         {
             int x = Grid.GetColumn(image) - offset;
-            int y = Grid.GetRow(image) - offset;
+            int y = 7 - (Grid.GetRow(image) - offset);
             Coordinate coord = new(x, y);
             if(TryGetFigureAt(coord, out var figure))
             {
@@ -148,20 +148,20 @@ public class ChessEngine
                 if ( (selectedFigure == null || figure!.Faction == selectedFigure.Faction))
                 {
                     ResetHighlights();
-                    HighlightTile(tiles[x, y], Brushes.Yellow);
+                    HighlightTile(tiles[x, 7 - coord.y], Brushes.Yellow);
                     selectedFigure = figure;
                     for (int i = 0; i < 8; i++)
                     {
                         for (int j = 0; j < 8; j++)
                         {
                             if (selectedFigure.IsAttacking(new(i, j), this))
-                                HighlightTile(tiles[i, j]);
+                                HighlightTile(tiles[i, 7-j]);
                         }
                     }
                     foreach(var defender in figuresOnTheBoard.Values.Where(x => x.Faction == selectedFigure.Faction && x.IsAttacking(selectedFigure.Position, this)))
                     {
                         var defPos = defender.Position;
-                        HighlightTile(tiles[defPos.x, defPos.y], Brushes.CadetBlue);
+                        HighlightTile(tiles[defPos.x, 7-defPos.y], Brushes.CadetBlue);
                     }
                 }
                 else if (selectedFigure != null && figure!.Faction != selectedFigure.Faction)
@@ -173,8 +173,10 @@ public class ChessEngine
         else if(sender is Rectangle rect)
         {
             //move the selected figure.
-            Coordinate targetCoord = new(Grid.GetColumn(rect) - offset, Grid.GetRow(rect) - offset);
-            if(selectedFigure != null)
+            int x = Grid.GetColumn(rect) - offset;
+            int y = 7 - (Grid.GetRow(rect) - offset);
+            Coordinate targetCoord = new(x, y);
+            if (selectedFigure != null)
             {
                 ForceMove(targetCoord);
                 return;
@@ -217,7 +219,7 @@ public class ChessEngine
             var sprite = figure.Sprite;
             bool wasTaken = Grid.GetColumn(sprite) == 0;
             Grid.SetColumn(sprite, pos.x + offset);
-            Grid.SetRow(sprite, pos.y + offset);
+            Grid.SetRow(sprite, (7-pos.y) + offset);
             if(wasTaken)
             {
                 guiContext.TakenPiecesStackPanel.Children.Remove(sprite);
@@ -231,7 +233,7 @@ public class ChessEngine
     private void ResetDefaultColorTile(Rectangle tile)
     {
         tile.Fill = (Grid.GetColumn(tile) - offset) % 2 == (Grid.GetRow(tile) - offset) % 2
-                    ? Brushes.ForestGreen : Brushes.Beige;
+                    ? Brushes.Beige : Brushes.ForestGreen;
     }
 
     private void HighlightTile(Rectangle tile, Brush? highlightBrush = null)
@@ -275,7 +277,7 @@ public class ChessEngine
         selectedFigure.Position = targetCoord;
         var sprite = selectedFigure.Sprite;
         Grid.SetColumn(sprite, targetCoord.x + offset);
-        Grid.SetRow(sprite, targetCoord.y + offset);
+        Grid.SetRow(sprite, (7 - targetCoord.y) + offset);
         selectedFigure.HasBeenMoved = true;
         //deselect figure.
         ResetHighlights();
@@ -336,7 +338,7 @@ public class ChessEngine
                     promotedFigure.Position = promoteFigureTile;
                     sprite = promotedFigure.Sprite;
                     Grid.SetColumn(sprite, promoteFigureTile.x + offset);
-                    Grid.SetRow(sprite, promoteFigureTile.y + offset);
+                    Grid.SetRow(sprite, (7 - promoteFigureTile.y) + offset);
                 }
             }
         }

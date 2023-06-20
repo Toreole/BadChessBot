@@ -73,25 +73,25 @@
             <TextBlock Grid.Row="9" Grid.Column="7" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">g</TextBlock>
             <TextBlock Grid.Row="9" Grid.Column="8" TextAlignment="Center" VerticalAlignment="Top" FontSize="20">h</TextBlock>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">1</TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">2</TextBlock>
-            <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">3</TextBlock>
-            <TextBlock Grid.Row="4" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">4</TextBlock>
-            <TextBlock Grid.Row="5" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">5</TextBlock>
-            <TextBlock Grid.Row="6" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">6</TextBlock>
-            <TextBlock Grid.Row="7" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">7</TextBlock>
-            <TextBlock Grid.Row="8" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">8</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">8</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">7</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">6</TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">5</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">4</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">3</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">2</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="0" TextAlignment="Right" VerticalAlignment="Center" FontSize="20">1</TextBlock>
 
-            <TextBlock Grid.Row="1" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">1</TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">2</TextBlock>
-            <TextBlock Grid.Row="3" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">3</TextBlock>
-            <TextBlock Grid.Row="4" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">4</TextBlock>
-            <TextBlock Grid.Row="5" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">5</TextBlock>
-            <TextBlock Grid.Row="6" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">6</TextBlock>
-            <TextBlock Grid.Row="7" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">7</TextBlock>
-            <TextBlock Grid.Row="8" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">8</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">8</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">7</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">6</TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">5</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">4</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">3</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">2</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="9" TextAlignment="Left" VerticalAlignment="Center" FontSize="20">1</TextBlock>
         </Grid>
-        <Grid x:Name="PromotionPopup" Background="#AA303030">
+        <Grid x:Name="PromotionPopup" Background="#AA303030" Visibility="Hidden">
             <Grid Background="#FFFFFF" Width="500" Height="200">
                 <Label>PROMOTE</Label>
                 <StackPanel Margin="20 40 20 0">
