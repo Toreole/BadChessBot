@@ -339,6 +339,7 @@ public class ChessEngine
                     sprite = promotedFigure.Sprite;
                     Grid.SetColumn(sprite, promoteFigureTile.x + offset);
                     Grid.SetRow(sprite, (7 - promoteFigureTile.y) + offset);
+                    figuresOnTheBoard[promoteFigureTile] = promotedFigure;
                 }
             }
         }
